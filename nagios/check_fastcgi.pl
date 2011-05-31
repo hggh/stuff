@@ -5,6 +5,8 @@
 #
 # Copyright (c) 2009 Rodolfo Gonzalez <rodolfo_gonzalez@hotmail.com>
 #
+# * added unix socket option - Jonas Genannt
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -23,6 +25,7 @@
 use strict;
 use FCGI::Client;
 use IO::Socket::INET;
+use IO::Socket::UNIX;
 use Getopt::Long;
 
 # command line parameters with some defaults
@@ -40,17 +43,27 @@ GetOptions ('H=s' => \$host, 'p=i' => \$port, 's=s' => \$script, 'q=s' => \$quer
 
 if (($host eq '') || ($script eq '')) {
    print "Usage: check_php-cgi.pl -H host -s <test script> [-p port] [-q <query string>] [-e <expected string>] [-t <timeout seconds>]\n";
+   print "       use unix:/var/run/foo.socket as hostname for an fcgi unix socket.\n";
    exit(-1);
 }
 
 # run check
 
-my $sock = IO::Socket::INET->new(
-    PeerAddr => $host,
-    PeerPort => $port,
-    Timeout  => $timeout,
-    Proto    => 'tcp',
-) or &_bad();
+my $sock;
+if ($host =~m /^unix:(.*)/) {
+   $host = $1;
+   $sock = IO::Socket::UNIX->new(
+       Peer => $host,
+   ) or &_bad();
+}
+else {
+   $sock = IO::Socket::INET->new(
+       PeerAddr => $host,
+       PeerPort => $port,
+       Timeout  => $timeout,
+       Proto    => 'tcp',
+   ) or &_bad();
+}
 
 my $client = FCGI::Client::Connection->new( sock => $sock ) or &_bad();
 
