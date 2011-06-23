@@ -1,0 +1,13 @@
+<div style="text-align:center;font-size:16pt;font-weight:bold;">
+	<%= doc_title %>
+</div>
+
+
+<% resources_sorted.keys.each do |h| %>
+<div style="font-size:14pt;font-weight:bold;padding-top:15px;"><%= h %></div>
+   <div style="padding-left:25px;">
+   <% resources_sorted[h].each do |k| %>
+   <%= k %><br/>
+   <% end %>
+   </div>
+<% end %>
