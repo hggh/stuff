@@ -37,7 +37,7 @@ begin
         when "--usage"
             printusage(0)
         when "--resource"
-            option['restype'] = arg
+            option['restype'] = arg.split(/,/)
         when "--name"
             option['name'] = arg
         when "--template"
@@ -86,7 +86,7 @@ ActiveRecord::Base.establish_connection(args)
 option['template']  = "templates/default.html.erb" unless File.readable?(option['template'])
 doc_title = option['name']
 
-resources = Puppet::Rails::Resource.where("restype = ? ", option['restype'])
+resources = Puppet::Rails::Resource.where( "restype IN (?) ",  option['restype']    )
 
 resources_sorted = Hash.new
 
