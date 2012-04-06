@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+# Copyright 2012 Jonas Genannt <jonas@brachium-system.net>
+# Licensed under the Apache License, Version 2.0
+
+# regular expression for tag names
+tag_regexp = '^(prod|dev)\/[0-9]{4}-[0-9]{2}-[0-9]{2}_d[0-9]+$'
+
+rexp = Regexp.new(tag_regexp)
+
+message = Array.new
+while line = STDIN.gets
+	rev_old, rev_new, rev_name = line.strip.split
+	if rev_name =~ /^refs\/tags\/(.*)/
+		tag_name = $1
+		if !rexp.match(tag_name)
+			message << "Tag Name: #{tag_name} does not match our guidelines!"
+		end
+	end
+end
+
+if message.length > 0
+	puts "ERROR on push tag name:"
+	puts message.join("\n")
+	exit 1
+end
